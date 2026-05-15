@@ -1,50 +1,32 @@
-version: '3.8'
-
 services:
-  # 前端服务
-  frontend:
+  docker-log-frontend:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: docker-log-frontend
-    restart: unless-stopped
     ports:
       - "4041:4041"
-    networks:
-      - docker-log-network
-    depends_on:
-      - backend
+    restart: unless-stopped
     environment:
       - NODE_ENV=production
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4041/"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 10s
-
-  # 后端服务（如果需要一起部署）
-  backend:
-    image: docker-log-backend:latest
-    container_name: docker-log-backend
-    restart: unless-stopped
-    ports:
-      - "9091:9091"
+      - VITE_APP_TITLE=Docker日志查询服务
+      - VITE_APP_BASE_API=/api
+      - VITE_APP_PORT=4041
+      - VITE_APP_BACKEND_URL=${VITE_APP_BACKEND_URL:-https://log.animeparadise.vip}
+      - BACKEND_HOST=${BACKEND_HOST:-host.docker.internal}
+      - BACKEND_PORT=${BACKEND_PORT:-9091}
+      - SERVER_NAME=${SERVER_NAME:-localhost}
+    env_file:
+      - .env.production
     networks:
       - docker-log-network
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./logs:/app/logs
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9091/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4041/health"]
       interval: 30s
-      timeout: 3s
+      timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 10s
 
 networks:
   docker-log-network:
     driver: bridge
-    name: docker-log-network

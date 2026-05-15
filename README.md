@@ -81,7 +81,31 @@ npm run dev
 npm run build
 ```
 
+### 运行生产版本
+
+```bash
+# 构建并运行生产版本（需要安装 serve）
+npm run prod
+
+# 或者手动运行
+npm run build
+npx serve dist -l 4041
+```
+
 ### Docker 部署（推荐）
+
+**使用 deploy.sh 快速部署:**
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
+
+**或使用 Makefile:**
+```bash
+make deploy
+```
+
+**传统部署方式:**
 
 **Linux/Mac:**
 ```bash
@@ -115,6 +139,16 @@ npm run format
 ```
 
 ## 配置说明
+
+### Docker 部署文件说明
+
+本项目包含以下 Docker 部署相关文件：
+
+- **Dockerfile**: 多阶段构建 Docker 镜像，使用 Node.js 18 Alpine 作为构建环境，Nginx Alpine 作为运行环境
+- **docker-compose.yml**: Docker Compose 配置文件，用于一键部署前端服务
+- **nginx.conf**: Nginx 配置文件，包含 API 代理、gzip 压缩、静态资源缓存等优化配置
+- **deploy.sh**: 自动化部署脚本，支持代码拉取、环境变量配置、服务重启等功能
+- **.dockerignore**: Docker 构建时忽略的文件列表，优化构建速度
 
 ### 后端API代理
 
@@ -163,6 +197,78 @@ server: {
 4. **文件组织**: 按功能模块组织文件结构
 5. **注释规范**: 关键逻辑必须添加注释
 6. **认证处理**: 401 未授权时自动跳转登录页（详见 [AUTH_401_HANDLING.md](./AUTH_401_HANDLING.md)）
+
+## Docker 部署指南
+
+### 使用 deploy.sh 脚本部署
+
+`deploy.sh` 是一个自动化部署脚本，它会：
+1. 停止当前的 Docker 服务
+2. 从 Git 仓库拉取最新代码
+3. 检查并配置环境变量
+4. 重新构建并启动 Docker 服务
+
+```bash
+# 赋予执行权限
+chmod +x deploy.sh
+
+# 执行部署
+./deploy.sh
+```
+
+### 使用 Docker Compose 部署
+
+```bash
+# 构建并启动服务
+docker compose up -d --build
+
+# 查看服务状态
+docker compose ps
+
+# 查看日志
+docker compose logs -f
+
+# 停止服务
+docker compose down
+```
+
+### 使用 Makefile 部署
+
+```bash
+# 快速部署
+make deploy
+
+# 仅构建镜像
+make docker-build
+
+# 清理 Docker 资源
+make docker-clean
+```
+
+### 环境变量配置
+
+项目使用 `.env.production` 文件配置生产环境变量：
+
+```env
+# 生产环境配置
+VITE_APP_TITLE=Docker日志查询服务
+VITE_APP_BASE_API=/api
+VITE_APP_PORT=4041
+VITE_APP_BACKEND_URL=https://log.animeparadise.vip
+
+# Nginx 代理配置（用于 Docker 部署）
+BACKEND_HOST=host.docker.internal
+BACKEND_PORT=9091
+```
+
+在部署前，请根据实际环境修改 `.env.production` 文件中的配置。
+
+### 域名配置
+
+如果你需要使用域名访问，可以：
+
+1. **使用 Docker 部署**：在服务器上配置反向代理（如 Nginx）将域名指向容器的 4041 端口
+2. **直接运行**：修改 `nginx.conf` 中的 `server_name` 为你的域名
 
 ## 注意事项
 

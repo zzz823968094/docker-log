@@ -8,6 +8,7 @@
     "build": "vue-tsc && vite build --mode production",
     "build:dev": "vue-tsc && vite build --mode development",
     "preview": "vite preview",
+    "prod": "npm run build && npx serve dist -l 4041",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "format": "prettier --write src/",
     "docker:build": "bash docker-build.sh",
@@ -15,7 +16,8 @@
     "docker:stop": "bash docker-stop.sh",
     "docker:update": "bash docker-update.sh",
     "docker:compose": "docker-compose up -d",
-    "docker:compose:prod": "docker-compose -f docker-compose.prod.yml up -d"
+    "docker:compose:prod": "docker-compose -f docker-compose.prod.yml up -d",
+    "deploy": "bash deploy.sh"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",

@@ -1,4 +1,4 @@
-.PHONY: help install dev build preview lint format docker-build docker-deploy docker-stop docker-update docker-compose-clean
+.PHONY: help install dev build preview lint format docker-build docker-deploy docker-stop docker-update docker-compose-clean deploy prod
 
 # 默认目标
 help:
@@ -12,6 +12,9 @@ help:
 	@echo "  make build-test   - 构建测试版本"
 	@echo "  make preview      - 预览构建结果"
 	@echo ""
+	@echo "生产运行:"
+	@echo "  make prod         - 构建并运行生产版本"
+	@echo ""
 	@echo "代码质量:"
 	@echo "  make lint         - ESLint检查"
 	@echo "  make format       - Prettier格式化"
@@ -23,6 +26,9 @@ help:
 	@echo "  make docker-update   - 更新服务"
 	@echo "  make docker-compose  - Docker Compose部署"
 	@echo "  make docker-clean    - 清理Docker资源"
+	@echo ""
+	@echo "快速部署:"
+	@echo "  make deploy          - 使用deploy.sh快速部署"
 	@echo ""
 
 # 安装依赖
@@ -90,3 +96,12 @@ docker-clean:
 	@echo "清理未使用的Docker资源..."
 	@docker system prune -f
 	@echo "清理完成"
+
+# 快速部署
+deploy:
+	@chmod +x deploy.sh
+	@./deploy.sh
+
+# 构建并运行生产版本
+prod:
+	@npm run prod
