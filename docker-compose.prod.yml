@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # 前端服务 - 生产环境
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+    container_name: docker-log-frontend-prod
+    restart: always
+    ports:
+      - "4041:4041"
+    networks:
+      - docker-log-network
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4041/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+networks:
+  docker-log-network:
+    driver: bridge
+    name: docker-log-network

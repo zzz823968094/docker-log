@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # 前端服务
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: docker-log-frontend
+    restart: unless-stopped
+    ports:
+      - "4041:4041"
+    networks:
+      - docker-log-network
+    depends_on:
+      - backend
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4041/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # 后端服务（如果需要一起部署）
+  backend:
+    image: docker-log-backend:latest
+    container_name: docker-log-backend
+    restart: unless-stopped
+    ports:
+      - "9091:9091"
+    networks:
+      - docker-log-network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./logs:/app/logs
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+
+networks:
+  docker-log-network:
+    driver: bridge
+    name: docker-log-network
